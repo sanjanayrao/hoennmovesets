@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+<style>
+    [v-cloak]{
+        display: none;
+    }
+    .main{
+        background-color: #fcf7ff;
+
+    }
+    .container{
+        background-color: #fcf7ff;
+        color: #1C0221
+    }
+   
+    .btn-lg {
+        padding: 10px 50px;
+        margin: 5px;
+        border-radius: 10px;
+        width: 200px
+    }
+    .table {
+        margin-right: 0px
+    }
+    .moves{
+        width: 45%;
+    }
+    .sprites{
+        width:20%;
+    }
+    .note {
+        font-size: 12px;
+    }
+    .fire{
+        background-color: orange;
+        color: white;
+    }
+    .flying{
+        background-color: #a78ae6;
+        color: white;
+    }
+    .poison{
+        background-color: purple;
+        color: white;
+    }
+    .ground{
+        background-color: #d4bd74;
+        color: white;
+    }
+    .rock{
+        background-color: #947309;
+        color: white;
+    }
+    .bug{
+        background-color: #a4e67e;
+        color: white;
+    }
+    .ghost{
+        background-color: #6a34a3;
+        color: white;
+    }
+    .dragon{
+        background-color: #7548f0;
+        color: white;
+    }
+    .psychic{
+        background-color: #eb33f5;
+        color: white;
+    }
+    .smaller{
+        font-size: 12px;
+    }
+    .hov:hover{
+        color: white;
+        filter: brightness(85%);
+    }
+    .modal {
+        display: block;
+        position: fixed;
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto;
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 5%;
+        border: 1px solid #888;
+        width: 50%; /* Could be more or less, depending on screen size */
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
+</style>
+
+<div id="app" class="main">
+    <div class="container" v-cloak>
+        <div class="jumbotron container jumbotron-fluid">
+            <div class="container">
+              <h1 class="display-4">Sanj's Gen III Pokemon Guide</h1>
+              <p class="lead"> One stop shop for my suggested movesets for all Pokemon in the Hoenn region</p>
+              <p class="note"> *Note: these movesets are in-game specific with the context of normal gameplay  </p>
+
+            </div>
+        </div>
+        <div v-if="modalInfo.show" class="modal">
+            <div class="modal-content">
+                <span v-on:click="hideModal()" class="close">&times;</span>
+                <table class="table">
+                    <h2>{{modalInfo.name}}</h2>
+                        <tr >
+                            <th scope="col">Type</th>
+                            <td>{{modalInfo.type}}</td>
+                        </tr>
+                        <tr >
+                            <th scope="col">Category</th>
+                            <td>{{modalInfo.damageClass}}</td>
+                        </tr>
+                        <tr >
+                            <th scope="col">PP</th>
+                            <td>{{modalInfo.pp}}</td>
+                        </tr>
+                        <tr >
+                            <th scope="col">Power</th>
+                            <td>{{modalInfo.power}}</td>
+                        </tr>
+                        <tr >
+                            <th scope="col">Accuracy</th>
+                            <td>{{modalInfo.accuracy}}</td>
+                        </tr>
+                        <tr><th></th><td></td></tr>
+                </table>
+                <p>{{modalInfo.description}}</p>
+            </div>
+   
+        </div>
+        <div class="card mt-5">
+            <table class="table">
+                <thead class="thead">
+                    <tr class="table_head">
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Sprite</th>
+                        <th scope="col">Type(s)</th>
+                        <th scope="col">Suggested Moveset</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(p, index) in pokemon.poke">
+                    <th scope="row">{{p.id}}</th>
+                    <td class="sprites">{{p.name}}</td>
+                    <td class="sprites">
+                      <img v-bind:src="p.sprite" v-bind:alt="p.name">
+                    </td>
+                    <td class="sprites" >
+                        <p v-for="t in p.types">{{t}}</p>
+                    </td>
+                    <td class="moves">
+                        <div class="row">
+                            <button type="button" :id="p.moveset[0].id" v-on:click="showModal(p.moveset[0].id, p.moveset[0].type)" class="btn btn-lg" :class="chooseButtonColor(p.moveset[0].type)" >{{p.moveset[0].name}}</button>                            
+                            <button type="button" :id="p.moveset[0].id" v-on:click="showModal(p.moveset[1].id, p.moveset[1].type)" class="btn btn-lg" :class="chooseButtonColor(p.moveset[1].type)">{{p.moveset[1].name}}</button>
+                        </div>
+                          <div class="row">
+                            <button type="button" :id="p.moveset[0].id" v-on:click="showModal(p.moveset[2].id, p.moveset[2].type)" class="btn btn-lg" :class="chooseButtonColor(p.moveset[2].type)">{{p.moveset[2].name}}</button>
+                            <button type="button" :id="p.moveset[0].id" v-on:click="showModal(p.moveset[3].id, p.moveset[3].type)" class="btn btn-lg" :class="chooseButtonColor(p.moveset[3].type)">{{p.moveset[3].name}}</button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<script>
+
+
+   
+    var vm = new Vue({
+        el: '#app',
+        data:{
+            modalInfo: {
+                show: false,
+                description: "",
+                type: "",
+                damageClass: "",
+                power: "",
+                pp: "",
+                name: "",
+                accuracy: ""
+
+            },
+            pokeList: [],
+            pokemon: { poke: [] },
+        },
+        created: function(){
+            this.fetchPokemon();
+        },
+        methods: {
+            fetchPokemon: function() {
+                var url = "https://pokeapi.co/api/v2/pokemon?limit=135&offset=251";
+                axios.get(url)
+                    .then(function(res){
+                            vm.pokeList = res.data.results;
+                    }).then(() => this.fetchInfo())//.then(()=>this.getTypes());
+            },
+            fetchInfo: async function () {
+                for(let i = 0; i < vm.pokeList.length; i++){                
+                    var s = vm.pokeList[i].url;
+                    var res = s.match(/pokemon\/(\d+)/);
+                   
+                    var tempMoveset = [];
+                    // select correct moveset
+                    switch(res[1] - 252){
+                        // treecko
+                        case 0:
+                            tempMoveset = [
+                                {name: "leer", id: 43, type: "normal"},
+                                {name: "absorb", id: 71, type: "grass"},
+                                {name: "quick attack", id: 98, type: "normal"},
+                                {name: "pound", id: 1, type: "normal"},
+                                ]
+                        break;
+                        // grovyle
+                        case 1:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "leaf blade", id: 348, type: "grass"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "bullet seed", id: 331, type: "grass"},
+                                ]
+                        break;
+                        // sceptile
+                        case 2:
+                            tempMoveset = [
+                                {name: "solar beam", id: 76, type: "grass"},
+                                {name: "leaf blade", id: 348, type: "grass"},
+                                {name: "sunny day", id: 241, type: "fire"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                ]
+                        break;
+                        // torchic
+                        case 3:
+                            tempMoveset = [
+                                {name: "ember", id: 52, type: "fire"},
+                                {name: "peck", id: 64, type: "flying"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "scratch", id: 10, type: "normal"},
+                                ]
+                        break;
+                        // combusken
+                        case 4:
+                            tempMoveset = [
+                                {name: "double kick", id: 24, type: "fighting"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "bulk up", id: 339, type: "fighting"},
+                                ]
+                        break;
+                        // blaziken
+                        case 5:
+                            tempMoveset = [
+                                {name: "sky uppercut", id: 327, type: "fighting"},
+                                {name: "blaze kick", id: 299, type: "fire"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "bulk up", id: 339, type: "fighting"},
+                                ]
+                        break;
+                        // mudkip
+                        case 6:
+                            tempMoveset = [
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "mud-slap", id: 189, type: "ground"},
+                                {name: "water gun", id: 55, type: "water"},
+                                ]
+                        break;
+                        // marshtomp
+                        case 7:
+                            tempMoveset = [
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "mud shot", id: 341, type: "ground"},
+                                {name: "water gun", id: 55, type: "water"},
+                                ]
+                        break;
+                        // swampert
+                        case 8:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "strength", id: 70, type: "normal"},
+                                ]
+                        break;
+                        // poochyena
+                        case 9:
+                            tempMoveset = [
+                                {name: "bite", id: 44, type: "dark"},
+                                {name: "sand attack", id: 28, type: "ground"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "howl", id: 336, type: "normal"},
+                                ]
+                        break;
+                        // mightyena
+                        case 10:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "howl", id: 336, type: "normal"},
+                                ]
+                        break;
+                        // zigzagoon
+                        case 11:
+                            tempMoveset = [
+                                {name: "sand attack", id: 28, type: "ground"},
+                                {name: "headbutt", id: 29, type: "normal"},
+                                {name: "tail whip", id: 39, type: "normal"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                ]
+                        break;
+                        // linoone
+                        case 12:
+                            tempMoveset = [
+                                {name: "belly drum", id: 187, type: "normal"},
+                                {name: "hyper beam", id: 63, type: "normal"},
+                                {name: "double team", id: 104, type: "normal"},
+                                {name: "strength", id: 70, type: "normal"},
+                                ]
+                        break;
+                        // wurmple
+                        case 13:
+                            tempMoveset = [
+                                {name: "string shot", id: 81, type: "bug"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "poison sting", id: 40, type: "poison"},
+                                {}
+                                ]
+                        break;
+                        // silcoon
+                        case 14:
+                            tempMoveset = [
+                                {name: "string shot", id: 81, type: "bug"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "poison sting", id: 40, type: "poison"},
+                                {name: "harden", id: 106, type: "normal"}
+                                ]
+                        break;
+                        // beautifly
+                        case 15:
+                            tempMoveset = [
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "morning sun", id: 234, type: "normal"},
+                                {name: "attract", id: 213, type: "normal"},
+                                {name: "silver wind", id: 318, type: "bug"},
+                                ]
+                        break;
+                        // cascoon
+                        case 16:
+                            tempMoveset = [
+                                {name: "string shot", id: 81, type: "bug"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "poison sting", id: 40, type: "poison"},
+                                {name: "harden", id: 106, type: "normal"}
+                                ]
+                        break;
+                        // dustox
+                        case 17:
+                            tempMoveset = [
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "moonlight", id: 236, type: "normal"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "silver wind", id: 318, type: "bug"},
+                                ]
+                        break;
+                        // lotad
+                        case 18:
+                            tempMoveset = [
+                                {name: "astonish", id: 310, type: "ghost"},
+                                {name: "growl", id: 45, type: "normal"},
+                                {name: "absorb", id: 71, type: "grass"},
+                                {name: "nature power", id: 267, type: "normal"},
+                                ]
+                        break;
+                        // lombre
+                        case 19:
+                            tempMoveset = [
+                                {name: "astonish", id: 310, type: "ghost"},
+                                {name: "fury swipes", id: 154, type: "normal"},
+                                {name: "absorb", id: 71, type: "grass"},
+                                {name: "nature power", id: 267, type: "normal"},
+                                ]
+                        break;
+                        // ludicolo
+                        case 20:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "rain dance", id: 240, type: "water"},
+                                ]
+                        break;
+                        // seedot
+                        case 21:
+                            tempMoveset = [
+                                {name: "bide", id: 117, type: "normal"},
+                                {name: "harden", id: 106, type: "normal"},
+                                {name: "growth", id: 74, type: "normal"},
+                                {name: "nature power", id: 267, type: "normal"},
+                                ]
+                        break;
+                        // nuzleaf
+                        case 22:
+                            tempMoveset = [
+                                {name: "bullet seed", id: 331, type: "grass"},
+                                {name: "extrasensory", id: 326, type: "psychic"},
+                                {name: "feint attack", id: 185, type: "dark"},
+                                {name: "razor wind", id: 13, type: "normal"},
+                                ]
+                        break;
+                        // shiftry
+                        case 23:
+                            tempMoveset = [
+                                {name: "bullet seed", id: 331, type: "grass"},
+                                {name: "extrasensory", id: 326, type: "psychic"},
+                                {name: "feint attack", id: 185, type: "dark"},
+                                {name: "razor wind", id: 13, type: "normal"},
+                                ]
+                        break;
+                        // taillow
+                        case 24:
+                            tempMoveset = [
+                                {name: "double team", id: 104, type: "normal"},
+                                {name: "quick attack", id: 98, type: "normal"},
+                                {name: "wing attack", id: 17, type: "flying"},
+                                {name: "focus energy", id: 116, type: "normal"},
+                                ]
+                        break;
+                        // swellow
+                        case 25:
+                            tempMoveset = [
+                                {name: "double team", id: 104, type: "normal"},
+                                {name: "endeavor", id: 283, type: "normal"},
+                                {name: "aerial ace", id: 332, type: "flying"},
+                                {name: "fly", id: 19, type: "flying"},
+                                ]
+                        break;
+                        // wingull
+                        case 26:
+                            tempMoveset = [
+                                {name: "wing attack", id: 17, type: "flying"},
+                                {name: "supersonic", id: 48, type: "normal"},
+                                {name: "water gun", id: 55, type: "water"},
+                                {name: "growl", id: 45, type: "normal"},
+                                ]
+                        break;
+                        // pelipper
+                        case 27:
+                            tempMoveset = [
+                                {name: "protect", id: 182, type: "normal"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "fly", id: 19, type: "flying"},
+                                {name: "surf", id: 57, type: "water"},
+                                ]
+                        break;
+                        // ralts
+                        case 28:
+                            tempMoveset = [
+                                {name: "growl", id: 45, type: "normal"},
+                                {name: "confusion", id: 93, type: "psychic"},
+                                {name: "double team", id: 104, type: "normal"},
+                                {},
+                                ]
+                        break;
+                        // kirlia
+                        case 29:
+                            tempMoveset = [
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "double team", id: 104, type: "normal"},
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                ]
+                        break;
+                        // gardevoir
+                        case 30:
+                            tempMoveset = [
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "hypnosis", id: 95, type: "psychic"},
+                                {name: "dream eater", id: 138, type: "psychic"},
+                                ]
+                        break;
+                        // surskit
+                        case 31:
+                            tempMoveset = [
+                                {name: "bubble", id: 145, type: "water"},
+                                {name: "quick attack", id: 98, type: "normal"},
+                                {name: "sweet scent", id: 230, type: "normal"},
+                                {name: "water sport", id: 346, type: "water"},
+                                ]
+                        break;
+                        // masquerain
+                        case 32:
+                            tempMoveset = [
+                                {name: "stun spore", id: 78, type: "grass"},
+                                {name: "silver wind", id: 318, type: "bug"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                ]
+                        break;
+                        // shroomish
+                        case 33:
+                            tempMoveset = [
+                                {name: "mega drain", id: 72, type: "grass"},
+                                {name: "stun spore", id: 78, type: "grass"},
+                                {name: "leech seed", id: 73, type: "grass"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                ]
+                        break;
+                        // breloom
+                        case 34:
+                            tempMoveset = [
+                                {name: "mind reader", id: 170, type: "normal"},
+                                {name: "stun spore", id: 78, type: "grass"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "dynamic punch", id: 223, type: "fighting"},
+                                ]
+                        break;
+                        // slakoth
+                        case 35:
+                            tempMoveset = [
+                                {name: "scratch", id: 10, type: "normal"},
+                                {name: "yawn", id: 281, type: "normal"},
+                                {name: "encore", id: 227, type: "normal"},
+                                {name: "slack off", id: 303, type: "normal"},
+                                ]
+                        break;
+                        // vigoroth
+                        case 36:
+                            tempMoveset = [
+                                {name: "slash", id: 163, type: "normal"},
+                                {name: "yawn", id: 281, type: "normal"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                ]
+                        break;
+                        // slaking
+                        case 37:
+                            tempMoveset = [
+                                {name: "slash", id: 163, type: "normal"},
+                                {name: "rest", id: 156, type: "psychic"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "sleep talk", id: 214, type: "normal"},
+                                ]
+                        break;
+                        // nincada
+                        case 38:
+                            tempMoveset = [
+                                {name: "harden", id: 106, type: "normal"},
+                                {name: "leech life", id: 141, type: "bug"},
+                                {name: "fury swipes", id: 154, type: "normal"},
+                                {name: "sand attack", id: 28, type: "ground"},
+                                ]
+                        break;
+                        // ninjask
+                        case 39:
+                            tempMoveset = [
+                                {name: "slash", id: 163, type: "normal"},
+                                {name: "swords dance", id: 14, type: "normal"},
+                                {name: "dig", id: 91, type: "ground"},
+                                {name: "aerial ace", id: 332, type: "flying"},
+                                ]
+                        break;
+                        // shedinja
+                        case 40:
+                            tempMoveset = [
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "dig", id: 91, type: "ground"},
+                                ]
+                        break;
+                        // whismur
+                        case 41:
+                            tempMoveset = [
+                                {name: "howl", id: 336, type: "normal"},
+                                {name: "astonish", id: 310, type: "ghost"},
+                                {name: "pound", id: 1, type: "normal"},
+                                {name: "uproar", id: 253, type: "normal"},
+                                ]
+                        break;
+                        // loudred
+                        case 42:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "return", id: 216, type: "normal"},
+                                ]
+                        break;
+                        // exploud
+                        case 43:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "hyper voice", id: 304, type: "normal"},
+                                ]
+                        break;
+                        break;
+                        // makuhita
+                        case 44:
+                            tempMoveset = [
+                                {name: "vital throw", id: 233, type: "fighting"},
+                                {name: "focus energy", id: 116, type: "normal"},
+                                {name: "sand attack", id: 28, type: "ground"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                ]
+                        break;
+                        // hariyama
+                        case 45:
+                            tempMoveset = [
+                                {name: "belly drum", id: 187, type: "normal"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "strength", id: 70, type: "normal"},
+                                ]
+                        break;
+                        // azurill
+                        case 46:
+                            tempMoveset = [
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "slam", id: 21, type: "normal"},
+                                {name: "charm", id: 204, type: "normal"},
+                                {name: "surf", id: 57, type: "water"},
+                                ]
+                        break;
+                        // nosepass
+                        case 47:
+                            tempMoveset = [
+                                {name: "lock-on", id: 199, type: "normal"},
+                                {name: "zap cannon", id: 192, type: "electric"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "rock slide", id: 157, type: "rock"},
+                                ]
+                        break;
+                        // skitty
+                        case 48:
+                            tempMoveset = [
+                                {name: "attract", id: 213, type: "normal"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "return", id: 216, type: "normal"},
+                                {name: "shock wave", id: 351, type: "electric"},
+                                ]
+                        break;
+                        // delcatty
+                        case 49:
+                            tempMoveset = [
+                                {name: "attract", id: 213, type: "normal"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "return", id: 216, type: "normal"},
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                ]
+                        break;
+                        // sableye
+                        case 50:
+                            tempMoveset = [
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "ice punch", id: 8, type: "ice"},
+                                ]
+                        break;
+                        // mawile
+                        case 51:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "swords dance", id: 14, type: "normal"},
+                                {name: "double-edge", id: 38, type: "normal"},
+                                {name: "fire blast", id: 126, type: "fire"},
+                                ]
+                        break;
+                        // aron
+                        case 52:
+                            tempMoveset = [
+                                {name: "iron tail", id: 231, type: "steel"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "strength", id: 70, type: "normal"},
+                                {name: "iron defense", id: 334, type: "steel"},
+                                ]
+                        break;
+                        // lairon
+                        case 53:
+                            tempMoveset = [
+                                {name: "iron tail", id: 231, type: "steel"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "strength", id: 70, type: "normal"},
+                                {name: "iron defense", id: 334, type: "steel"},
+                                ]
+                        break;
+                        // aggron
+                        case 54:
+                            tempMoveset = [
+                                {name: "iron tail", id: 231, type: "steel"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "double-edge", id: 38, type: "normal"},
+                                {name: "dragon claw", id: 337, type: "dragon"},
+                                ]
+                        break;
+                        // meditite
+                        case 55:
+                            tempMoveset = [
+                                {name: "high jump kick", id: 136, type: "fighting"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "bulk up", id: 339, type: "fighting"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                ]
+                        break;
+                        // medicham
+                        case 56:
+                            tempMoveset = [
+                                {name: "high jump kick", id: 136, type: "fighting"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                ]
+                        break;
+                        // electrike
+                        case 57:
+                            tempMoveset = [
+                                {name: "shock wave", id: 351, type: "electric"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                {name: "quick attack", id: 98, type: "normal"},
+                                {name: "howl", id: 336, type: "normal"},
+                                ]
+                        break;
+                         // manectric
+                        case 58:
+                            tempMoveset = [
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                {name: "charge", id: 268, type: "electric"},
+                                {name: "bite", id: 44, type: "dark"},
+                                ]
+                        break;
+                       // plusle
+                        case 59:
+                            tempMoveset = [
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                {name: "charge", id: 268, type: "electric"},
+                                {name: "encore", id: 227, type: "normal"},
+                                ]
+                        break;
+                        // minun
+                        case 60:
+                            tempMoveset = [
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                {name: "charge", id: 268, type: "electric"},
+                                {name: "encore", id: 227, type: "normal"},
+                                ]
+                        break;
+                        // volbeat
+                        case 61:
+                            tempMoveset = [
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "ice punch", id: 8, type: "ice"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                {name: "signal beam", id: 324, type: "bug"},
+                                ]
+                        break;
+                         // illumise
+                        case 62:
+                            tempMoveset = [
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "wish", id: 273, type: "normal"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                ]
+                        break;
+                       // roselia
+                        case 63:
+                            tempMoveset = [
+                                {name: "petal dance", id: 80, type: "grass"},
+                                {name: "aromatherapy", id: 312, type: "grass"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                ]
+                        break;
+                        // gulpin
+                        case 64:
+                            tempMoveset = [
+                                {name: "encore", id: 227, type: "normal"},
+                                {name: "sludge", id: 124, type: "poison"},
+                                {name: "yawn", id: 281, type: "normal"},
+                                {name: "amnesia", id: 133, type: "psychic"},
+                                ]
+                        break;
+                        // swalot
+                        case 65:
+                            tempMoveset = [
+                                {name: "sludge bomb", id: 103, type: "poison"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "fire punch", id: 317, type: "fire"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                ]
+                        break;
+                        // carvanha
+                        case 66:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "double team", id: 104, type: "normal"},
+                                ]
+                        break;
+                         // sharpedo
+                        case 67:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "skull bash", id: 130, type: "normal"},
+                                ]
+                        break;
+                       // wailmer
+                        case 68:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "water spout", id: 323, type: "water"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                ]
+                        break;
+                        // wailord
+                        case 69:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "water spout", id: 323, type: "water"},
+                                {name: "rest", id: 156, type: "ice"},
+                                {name: "sleep talk", id: 214, type: "poison"},
+                                ]
+                        break;
+                        // numel
+                        case 70:
+                            tempMoveset = [
+                                {name: "focus energy", id: 116, type: "normal"},
+                                {name: "magnitude", id: 222, type: "ground"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "amnesia", id: 133, type: "psychic"},
+                                ]
+                        break;
+                        // camerupt
+                        case 71:
+                            tempMoveset = [
+                                {name: "eruption", id: 284, type: "fire"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "amnesia", id: 133, type: "psychic"},
+                                ]
+                        break;
+                        // torkoal
+                        case 72:
+                            tempMoveset = [
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "iron defense", id: 334, type: "steel"},
+                                {name: "amnesia", id: 133, type: "psychic"},
+                                ]
+                        break;
+                        // spoink
+                        case 73:
+                            tempMoveset = [
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "psybeam", id: 60, type: "psychic"},
+                                {name: "shock wave", id: 351, type: "electric"},
+                                ]
+                        break;
+                        // grumpig
+                        case 74:
+                            tempMoveset = [
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "toxic", id: 92, type: "poison"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "bounce", id: 340, type: "flying"},
+                                ]
+                        break;
+                        //spinda
+                        case 75:
+                            tempMoveset = [
+                                {name: "thrash", id: 37, type: "normal"},
+                                {name: "dizzy punch", id: 146, type: "normal"},
+                                {name: "return", id: 216, type: "normal"},
+                                {name: "double team", id: 104, type: "normal"},
+                                ]
+                        break;
+                         // trapinch
+                        case 76:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "dig", id: 91, type: "ground"},
+                                {name: "sand tomb", id: 328, type: "ground"},
+                                {name: "double team", id: 104, type: "normal"},
+                                ]
+                        break;
+                        //vibrava
+                        case 77:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "sand tomb", id: 328, type: "ground"},
+                                {name: "screech", id: 103, type: "normal"},
+                                ]
+                        break;
+                        // flygon
+                        case 78:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "rock slide", id: 157, type: "rock"},
+                                {name: "screech", id: 103, type: "normal"},
+                                ]
+                        break;
+                        // cacnea
+                        case 79:
+                            tempMoveset = [
+                                {name: "leech seed", id: 73, type: "grass"},
+                                {name: "absorb", id: 71, type: "grass"},
+                                {name: "ingrain", id: 275, type: "grass"},
+                                {name: "pin missile", id: 42, type: "bug"},
+                                ]
+                        break;
+                        // cacturne
+                        case 80:
+                            tempMoveset = [
+                                {name: "leech seed", id: 73, type: "grass"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "ingrain", id: 275, type: "grass"},
+                                {name: "toxic", id: 92, type: "bug"},
+                                ]
+                        break;
+                        // swablu
+                        case 81:
+                            tempMoveset = [
+                                {name: "fly", id: 19, type: "flying"},
+                                {name: "take down", id: 36, type: "normal"},
+                                {name: "sunny day", id: 241, type: "fire"},
+                                {name: "solar beam", id: 76, type: "grass"},
+                                ]
+                        break;
+                        // altaria
+                        case 82:
+                            tempMoveset = [
+                                {name: "sky attack", id: 143, type: "flying"},
+                                {name: "dragon dance", id: 349, type: "dragon"},
+                                {name: "aerial ace", id: 332, type: "fire"},
+                                {name: "dragon claw", id: 337, type: "dragon"},
+                                ]
+                        break;
+                        // zangoose
+                        case 83:
+                            tempMoveset = [
+                                {name: "swords dance", id: 14, type: "normal"},
+                                {name: "crush claw", id: 306, type: "normal"},
+                                {name: "double-edge", id: 38, type: "normal"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                ]
+                        break;
+                        // seviper
+                        case 84:
+                            tempMoveset = [
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "poison fang", id: 305, type: "poison"},
+                                {name: "glare", id: 137, type: "normal"},
+                                {name: "screech", id: 103, type: "normal"},
+                                ]
+                        break;
+                        // lunatone
+                        case 85:
+                            tempMoveset = [
+                                {name: "future sight", id: 248, type: "psychic"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                ]
+                        break;
+                        // solrock
+                        case 86:
+                            tempMoveset = [
+                                {name: "sunny day", id: 241, type: "fire"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "solar beam", id: 76, type: "grass"},
+                                {name: "rock slide", id: 157, type: "rock"},
+                                ]
+                        break;
+                        // barboach
+                        case 87:
+                            tempMoveset = [
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "rest", id: 156, type: "psychic"},
+                                {name: "snore", id: 173, type: "normal"},
+                                ]
+                        break;
+                        // whiscash
+                        case 88:
+                            tempMoveset = [
+                                {name: "screech", id: 103, type: "normal"},
+                                {name: "leaf blade", id: 348, type: "grass"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "bullet seed", id: 331, type: "grass"},
+                                ]
+                        break;
+                        // corphish
+                        case 89:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "harden", id: 106, type: "normal"},
+                                {name: "knock off", id: 282, type: "dark"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // crawdaunt
+                        case 90:
+                            tempMoveset = [
+                                {name: "crabhammer", id: 152, type: "water"},
+                                {name: "rain dance", id: 240, type: "water"},
+                                {name: "knock off", id: 282, type: "dark"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // baltoy
+                        case 91:
+                            tempMoveset = [
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "psybeam", id: 60, type: "psychic"},
+                                {name: "self-destruct", id: 120, type: "normal"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // claydol
+                        case 92:
+                            tempMoveset = [
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "explosion", id: 153, type: "normal"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // lileep
+                        case 93:
+                            tempMoveset = [
+                                {name: "ingrain", id: 275, type: "grass"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "rock tomb", id: 317, type: "rock"},
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                ]
+                        break;
+                        // cradily
+                        case 94:
+                            tempMoveset = [
+                                {name: "ingrain", id: 275, type: "grass"},
+                                {name: "giga drain", id: 202, type: "grass"},
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                ]
+                        break;
+                        // anorith
+                        case 95:
+                            tempMoveset = [
+                                {name: "dig", id: 91, type: "ground"},
+                                {name: "harden", id: 106, type: "normal"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                ]
+                        break;
+                        // armaldo
+                        case 96:
+                            tempMoveset = [
+                                {name: "dig", id: 91, type: "ground"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                ]
+                        break;
+                        // feebas
+                        case 97:
+                            tempMoveset = [
+                                {name: "splash", id: 150, type: "normal"},
+                                {name: "tackle", id: 33, type: "normal"},
+                                {name: "flail", id: 175, type: "normal"},
+                                {},
+                                ]
+                        break;
+                        // milotic
+                        case 98:
+                            tempMoveset = [
+                                {name: "recover", id: 105, type: "normal"},
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "attract", id: 213, type: "normal"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // castform
+                        case 99:
+                            tempMoveset = [
+                                {name: "sunny day", id: 241, type: "fire"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // kecleon
+                        case 100:
+                            tempMoveset = [
+                                {name: "substitute", id: 164, type: "normal"},
+                                {name: "psybeam", id: 60, type: "psychic"},
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "toxic", id: 92, type: "grass"},
+                                ]
+                        break;
+                        // shuppet
+                        case 101:
+                            tempMoveset = [
+                                {name: "will-o-wisp", id: 261, type: "fire"},
+                                {name: "curse", id: 174, type: "ghost"},
+                                {name: "night shade", id: 101, type: "ghost"},
+                                {name: "feint attack", id: 185, type: "dark"},
+                                ]
+                        break;
+                        // banette
+                        case 102:
+                            tempMoveset = [
+                                {name: "will-o-wisp", id: 261, type: "fire"},
+                                {name: "curse", id: 174, type: "ghost"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "feint attack", id: 185, type: "dark"},
+                                ]
+                        break;
+                        // duskull
+                        case 103:
+                            tempMoveset = [
+                                {name: "curse", id: 174, type: "ghost"},
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "night shade", id: 101, type: "ghost"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // dusclops
+                        case 104:
+                            tempMoveset = [
+                                {name: "curse", id: 174, type: "ghost"},
+                                {name: "confuse ray", id: 109, type: "ghost"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "will-o-wisp", id: 261, type: "fire"},
+                                ]
+                        break;
+                        // tropius
+                        case 105:
+                            tempMoveset = [
+                                {name: "sunny day", id: 241, type: "fire"},
+                                {name: "solar beam", id: 76, type: "grass"},
+                                {name: "synthesis", id: 235, type: "grass"},
+                                {name: "aerial ace", id: 332, type: "flying"},
+                                ]
+                        break;
+                        // chimecho
+                        case 106:
+                            tempMoveset = [
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "heal bell", id: 215, type: "normal"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "shock wave", id: 351, type: "electric"},
+                                ]
+                        break;
+                        // absol
+                        case 107:
+                            tempMoveset = [
+                                {name: "swords dance", id: 14, type: "normal"},
+                                {name: "razor wind", id: 13, type: "normal"},
+                                {name: "double-edge", id: 38, type: "normal"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                ]
+                        break;
+                        // wynaut
+                        case 108:
+                            tempMoveset = [
+                                {name: "encore", id: 227, type: "normal"},
+                                {name: "mirror coat", id: 243, type: "psychic"},
+                                {name: "destiny bond", id: 194, type: "ghost"},
+                                {name: "counter", id: 68, type: "fighting"},
+                                ]
+                        break;
+                        // snorunt
+                        case 109:
+                            tempMoveset = [
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                ]
+                        break;
+                        // glalie
+                        case 110:
+                            tempMoveset = [
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "blizzard", id: 59, type: "ice"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                ]
+                        break;
+                        // spheal
+                        case 111:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // sealeo
+                        case 112:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // walrein
+                        case 113:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // clamperl
+                        case 114:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "whirlpool", id: 250, type: "water"},
+                                {name: "iron defense", id: 334, type: "steel"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // huntail
+                        case 115:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "whirlpool", id: 250, type: "water"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // gorebyss
+                        case 116:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "whirlpool", id: 250, type: "water"},
+                                {name: "psychic", id: 94, type: "steel"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // relicanth
+                        case 117:
+                            tempMoveset = [
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "double-edge", id: 38, type: "normal"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                ]
+                        break;
+                        // luvdisc
+                        case 118:
+                            tempMoveset = [
+                                {name: "sweet kiss", id: 186, type: "normal"},
+                                {name: "attract", id: 213, type: "normal"},
+                                {name: "surf", id: 57, type: "water"},
+                                {name: "double team", id: 104, type: "normal"},
+                                ]
+                        break;
+                        // bagon
+                        case 119:
+                            tempMoveset = [
+                                {name: "focus energy", id: 116, type: "normal"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "bite", id: 44, type: "dark"},
+                                {name: "sunny day", id: 241, type: "fire"},
+                                ]
+                        break;
+                        // shelgon
+                        case 120:
+                            tempMoveset = [
+                                {name: "focus energy", id: 116, type: "normal"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "bite", id: 44, type: "dark"},
+                                {name: "dragon breath", id: 225, type: "dragon"},
+                                ]
+                        break;
+                        // salamence
+                        case 121:
+                            tempMoveset = [
+                                {name: "fly", id: 19, type: "flying"},
+                                {name: "flamethrower", id: 53, type: "fire"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "dragon claw", id: 337, type: "dragon"},
+                                ]
+                        break;
+                        // beldum
+                        case 122:
+                            tempMoveset = [
+                                {name: "take down", id: 36, type: "normal"},
+                                {},
+                                {},
+                                {}
+                                ]
+                        break;
+                        // metang
+                        case 123:
+                            tempMoveset = [
+                                {name: "iron defense", id: 334, type: "steel"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "metal claw", id: 232, type: "steel"},
+                                {name: "take down", id: 36, type: "normal"},
+                                ]
+                        break;
+                        // metagross
+                        case 124:
+                            tempMoveset = [
+                                {name: "iron defense", id: 334, type: "steel"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "meteor mash", id: 309, type: "steel"},
+                                {name: "take down", id: 36, type: "normal"},
+                                ]
+                        break;
+                        // regirock
+                        case 125:
+                            tempMoveset = [
+                                {name: "lock-on", id: 199, type: "normal"},
+                                {name: "zap cannon", id: 192, type: "electric"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "superpower", id: 276, type: "fighting"},
+                                ]
+                        break;
+                        // regice
+                        case 126:
+                            tempMoveset = [
+                                {name: "hail", id: 258, type: "ice"},
+                                {name: "blizzard", id: 59, type: "ice"},
+                                {name: "thunderbolt", id: 85, type: "electric"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                ]
+                        break;
+                        // registeel
+                        case 127:
+                            tempMoveset = [
+                                {name: "lock-on", id: 199, type: "normal"},
+                                {name: "zap cannon", id: 192, type: "electric"},
+                                {name: "ancient power", id: 246, type: "rock"},
+                                {name: "superpower", id: 276, type: "fighting"},
+                                ]
+                        break;
+                        // latias
+                        case 128:
+                            tempMoveset = [
+                                {name: "recover", id: 105, type: "normal"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "dragon claw", id: 337, type: "dragon"},
+                                ]
+                        break;
+                        // latios
+                        case 129:
+                            tempMoveset = [
+                                {name: "recover", id: 105, type: "normal"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "dragon claw", id: 337, type: "dragon"},
+                                ]
+                        break;
+                        // kyogre
+                        case 130:
+                            tempMoveset = [
+                                {name: "water spout", id: 323, type: "water"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                {name: "surf", id: 57, type: "water"},
+                                ]
+                        break;
+                        // groudon
+                        case 131:
+                            tempMoveset = [
+                                {name: "solar beam", id: 76, type: "grass"},
+                                {name: "eruption", id: 284, type: "fire"},
+                                {name: "earthquake", id: 89, type: "ground"},
+                                {name: "thunder wave", id: 86, type: "electric"},
+                                ]
+                        break;
+                        // rayquaza
+                        case 132:
+                            tempMoveset = [
+                                {name: "outrage", id: 200, type: "dragon"},
+                                {name: "extreme speed", id: 245, type: "normal"},
+                                {name: "crunch", id: 242, type: "dark"},
+                                {name: "ice beam", id: 58, type: "ice"},
+                                ]
+                        break;
+                        // jirachi
+                        case 133:
+                            tempMoveset = [
+                                {name: "wish", id: 273, type: "normal"},
+                                {name: "future sight", id: 248, type: "psychic"},
+                                {name: "psychic", id: 94, type: "psychic"},
+                                {name: "calm mind", id: 347, type: "psychic"},
+                                ]
+                        break;
+                        //134 is default
+                        // deoxys
+                        default:
+                            tempMoveset = [
+                                {name: "psycho boost", id: 354, type: "psychic"},
+                                {name: "shadow ball", id: 247, type: "ghost"},
+                                {name: "brick break", id: 280, type: "fighting"},
+                                {name: "return", id: 216, type: "normal"},
+                                ]
+                           
+                        break;
+                    }
+                    var this_name = vm.pokeList[i].name === "deoxys-normal" ? "deoxys-attack (use choice band)" : vm.pokeList[i].name;
+
+                    var url = "https://pokeapi.co/api/v2/pokemon/" + res[1];
+                    var this_types = [];
+                    await axios.get(url)
+                        .then(function(res){
+                            console.log(res.data.types[0].type.name)
+                            this_types.push(res.data.types[0].type.name);
+                            if(res.data.types[1]){
+                                this_types.push(res.data.types[1].type.name);
+                             } 
+                        });
+                    vm.pokemon.poke.push( {
+                        name: this_name,
+                        sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + res[1] + ".png",
+                        id: res[1],
+                        moveset: tempMoveset,
+                        types: this_types
+                    });
+
+                }
+            },
+            chooseButtonColor: function(type){
+                var retClass;
+
+                switch(type){
+                    case "grass":
+                        retClass = "btn-success smaller";
+                    break;
+                    case "water":
+                        retClass = "btn-primary smaller";
+                    break;
+                    case "steel":
+                        retClass = "btn-secondary smaller";
+                    break;
+                    case "fighting":
+                        retClass = "btn-danger smaller";
+                    break;
+                    case "electric":
+                        retClass = "btn-warning smaller";
+                    break;
+                    case "ice":
+                        retClass = "btn-info smaller";
+                    break;
+                    case "normal":
+                        retClass = "btn-light smaller";
+                    break;
+                    case "dark":
+                        retClass = "btn-dark smaller";
+                    break;
+                    case "flying":
+                        retClass = "hov smaller flying";
+                    break;
+                    case "fire":
+                        retClass = "hov smaller fire";
+                    break;
+                    case "psychic":
+                        retClass = "hov smaller psychic";
+                    break;
+                    case "poison":
+                        retClass = "hov smaller poison";
+                    break;
+                    case "ground":
+                        retClass = "hov smaller ground";
+                    break;
+                    case "rock":
+                        retClass = "hov smaller rock";
+                    break;
+                    case "bug":
+                        retClass = "hov smaller bug";
+                    break;
+                    case "ghost":
+                        retClass = "hov smaller ghost";
+                    break;
+                    case "dragon":
+                        retClass = "hov smaller dragon";
+                    break;
+
+                   
+                }
+                return retClass;
+               
+            },
+            showModal: async function(id, type){
+                var url = "https://pokeapi.co/api/v2/move/" + id;
+                await axios.get(url)
+                    .then(function(res){
+                        vm.modalInfo.type = type;
+                        vm.modalInfo.name = res.data.name;
+                        vm.modalInfo.description = res.data.flavor_text_entries[2].flavor_text;
+                        vm.modalInfo.pp = res.data.pp;
+                        vm.modalInfo.power = res.data.power || "N/A";
+                        vm.modalInfo.damageClass = res.data.damage_class.name;
+                        vm.modalInfo.accuracy = res.data.accuracy || "N/A";
+
+                    })
+                vm.modalInfo.show = true;
+            },
+            hideModal: function(){
+                vm.modalInfo.show = false;
+                vm.modalInfo.type = "";
+                vm.modalInfo.name = "";
+                vm.modalInfo.pp = "";
+                vm.modalInfo.power = "";
+                vm.modalInfo.damageClass = "";
+                vm.modalInfo.accuracy = "";
+            } ,
+            getTypes: function(){
+                for(p in vm.pokemon.poke){
+                    var url = "https://pokeapi.co/api/v2/pokemon/" + p.id;
+                    axios.get(url)
+                        .then(function(res){
+                            p.types = res.data.types;
+                        });
+                    console.log(p.types)
+                }
+
+            }
+
+        }
+    });
+
+
+</script>
