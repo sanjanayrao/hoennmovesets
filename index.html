@@ -163,14 +163,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(p, index) in pokemon.poke">
+                <tr v-for="(p, index) in pokemon.poke" :key="pokemon.poke.id">
                     <th scope="row">{{p.id}}</th>
                     <td class="sprites">{{p.name}}</td>
                     <td class="sprites">
                       <img v-bind:src="p.sprite" v-bind:alt="p.name">
                     </td>
                     <td class="sprites" >
-                        <p v-for="t in p.types">{{t}}</p>
+                        <p v-for="t in p.types" >{{t}}</p>
                     </td>
                     <td class="moves">
                         <div class="row">
@@ -224,9 +224,9 @@
                 axios.get(url)
                     .then(function(res){
                             vm.pokeList = res.data.results;
-                    }).then(() => this.fetchInfo())//.then(()=>this.getTypes());
+                    }).then(() => this.fetchInfo()).then(()=>this.getTypes());
             },
-            fetchInfo: async function () {
+            fetchInfo: function () {
                 for(let i = 0; i < vm.pokeList.length; i++){                
                     var s = vm.pokeList[i].url;
                     var res = s.match(/pokemon\/(\d+)/);
@@ -1455,22 +1455,12 @@
                     }
                     var this_name = vm.pokeList[i].name === "deoxys-normal" ? "deoxys-attack (use choice band)" : vm.pokeList[i].name;
 
-                    var url = "https://pokeapi.co/api/v2/pokemon/" + res[1];
-                    var this_types = [];
-                    await axios.get(url)
-                        .then(function(res){
-                            console.log(res.data.types[0].type.name)
-                            this_types.push(res.data.types[0].type.name);
-                            if(res.data.types[1]){
-                                this_types.push(res.data.types[1].type.name);
-                             } 
-                        });
+
                     vm.pokemon.poke.push( {
                         name: this_name,
                         sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + res[1] + ".png",
                         id: res[1],
-                        moveset: tempMoveset,
-                        types: this_types
+                        moveset: tempMoveset
                     });
 
                 }
@@ -1560,14 +1550,21 @@
                 vm.modalInfo.damageClass = "";
                 vm.modalInfo.accuracy = "";
             } ,
-            getTypes: function(){
-                for(p in vm.pokemon.poke){
-                    var url = "https://pokeapi.co/api/v2/pokemon/" + p.id;
-                    axios.get(url)
+            getTypes: async function(){
+                for(let i = 0; i < vm.pokeList.length; i++){
+                    var url =  "https://pokeapi.co/api/v2/pokemon/" + vm.pokeList[i].url.match(/pokemon\/(\d+)/)[1];
+                    var this_types = [];
+                    await axios.get(url)
                         .then(function(res){
-                            p.types = res.data.types;
+                            this_types.push(res.data.types[0].type.name);
+                            if(res.data.types[1]){
+                                this_types.push(res.data.types[1].type.name);
+                             } 
                         });
-                    console.log(p.types)
+                    vm.pokemon.poke[i].types = this_types;
+                    console.log(vm.pokemon.poke[i])
+                    vm.$forceUpdate();
+
                 }
 
             }
